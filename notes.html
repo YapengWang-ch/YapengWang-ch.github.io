@@ -34,61 +34,61 @@
       box-shadow: var(--shadow); border: 1px solid var(--border); padding: 2rem; margin-bottom: 1.5rem;
     }
     .card h2 { font-size: 1.35rem; margin-bottom: 1rem; padding-bottom: .5rem; border-bottom: 2px solid var(--accent); }
+    .card small { color: var(--muted); display: block; margin-top: .5rem; }
 
-    /* ── 搜索 & 筛选 ── */
-    .filter-bar { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
-    .filter-bar input {
-      flex: 1; min-width: 200px; padding: .6rem 1rem;
-      border: 1px solid var(--border); border-radius: 8px; font-size: .95rem;
+    .tabs { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .tab {
+      padding: .6rem 1rem; border-radius: 999px; border: 1px solid var(--border); background: #fff;
+      color: var(--muted); cursor: pointer; transition: all .15s;
     }
-    .tag-filter { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: 1rem; }
-    .tag-chip {
-      padding: .3rem .8rem; border-radius: 20px; font-size: .8rem; cursor: pointer;
-      border: 1px solid var(--border); background: #fff; color: var(--muted); transition: all .15s;
-    }
-    .tag-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-    /* ── 笔记列表 ── */
-    .note-list { list-style: none; }
+    .user-bar {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem;
+      padding: .75rem 1rem; background: #e7f1ff; border-radius: 10px; margin-bottom: 1rem;
+    }
+    .user-bar .welcome { font-weight: 500; }
+    .user-bar .btn-sm {
+      padding: .35rem .9rem; border-radius: 8px; border: 1px solid var(--accent);
+      background: transparent; color: var(--accent); cursor: pointer; font-size: .85rem;
+    }
+    .user-bar .btn-sm:hover { background: var(--accent); color: #fff; }
+
+    .note-list { list-style: none; margin: 0; padding: 0; }
     .note-item {
-      padding: 1rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: .75rem;
-      transition: box-shadow .15s;
+      padding: 1rem; border: 1px solid var(--border); border-radius: 10px; margin-bottom: .85rem;
+      transition: box-shadow .15s; cursor: pointer;
     }
     .note-item:hover { box-shadow: var(--shadow); }
-    .note-item .note-title { font-size: 1.05rem; font-weight: 600; color: var(--accent); cursor: pointer; }
-    .note-item .note-meta { font-size: .8rem; color: var(--muted); margin: .25rem 0; }
-    .note-item .note-preview { font-size: .9rem; color: var(--text); margin-top: .3rem; }
-    .note-tag {
-      display: inline-block; background: #e7f1ff; color: var(--accent);
-      padding: .1rem .5rem; border-radius: 10px; font-size: .75rem; margin-right: .3rem;
+    .note-title { font-size: 1.05rem; font-weight: 600; color: var(--accent); }
+    .note-meta { color: var(--muted); font-size: .9rem; margin-top: .35rem; }
+    .note-author {
+      color: var(--accent); cursor: pointer; text-decoration: underline;
+      text-underline-offset: 2px;
     }
+    .note-author:hover { opacity: .8; }
+    .note-empty { text-align: center; color: var(--muted); padding: 2rem 1rem; }
 
-    /* ── 笔记详情弹窗 ── */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5);
-      z-index: 200; align-items: center; justify-content: center;
-    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; margin-bottom: .35rem; font-weight: 500; }
+    .form-group input, .form-group textarea { width: 100%; padding: .85rem 1rem; border: 1px solid var(--border); border-radius: 10px; font-size: .95rem; }
+    .form-group textarea { min-height: 160px; resize: vertical; }
+    .form-note { font-size: .88rem; color: var(--muted); margin-top: .25rem; }
+    .btn { background: var(--accent); color: #fff; border: none; padding: .75rem 1.5rem; border-radius: 10px; cursor: pointer; transition: opacity .15s; }
+    .btn:hover { opacity: .9; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .error-box { color: #dc3545; margin-bottom: 1rem; display: none; }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; align-items: center; justify-content: center; }
     .modal-overlay.open { display: flex; }
-    .modal {
-      background: #fff; border-radius: var(--radius); padding: 2rem;
-      max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto; position: relative;
-    }
-    .modal .close-btn {
-      position: absolute; top: 1rem; right: 1rem;
-      background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--muted);
-    }
-    .modal h3 { margin-bottom: .5rem; }
-    .modal .modal-date { color: var(--muted); font-size: .85rem; margin-bottom: 1rem; }
-    .modal .modal-body { line-height: 1.8; }
-    .modal .modal-body pre {
-      background: #f5f5f5; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: .9rem;
-    }
+    .modal { background: #fff; border-radius: var(--radius); padding: 2rem; width: min(760px, 90%); max-height: 85vh; overflow-y: auto; position: relative; }
+    .close-btn { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--muted); }
+    .modal h3 { margin-bottom: .75rem; }
+    .modal pre { background: #f5f5f5; padding: 1rem; border-radius: 10px; white-space: pre-wrap; word-break: break-word; }
 
-    footer {
-      text-align: center; padding: 1.5rem; color: var(--muted);
-      font-size: .85rem; border-top: 1px solid var(--border); margin-top: 2rem;
-    }
-    @media (max-width: 600px) { .navbar-inner { flex-direction: column; gap: .5rem; } }
+    footer { text-align: center; padding: 1.5rem; color: var(--muted); font-size: .85rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+    @media (max-width: 720px) { .form-row { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -106,303 +106,485 @@
 
 <div class="main">
   <div class="card">
-    <h2>📝 个人笔记</h2>
+    <h2>📝 笔记中心</h2>
+    <small>每个 Markdown 文件对应一篇笔记，注册后可上传。</small>
 
-    <!-- 搜索框 -->
-    <div class="filter-bar">
-      <input type="text" id="searchInput" placeholder="🔍 搜索笔记..." oninput="renderNotes()" />
+    <div class="user-bar" id="userBar">
+      <span class="welcome" id="userWelcome">未登录</span>
+      <button class="btn-sm" id="userActionBtn" onclick="showSection('account')">登录 / 注册</button>
     </div>
 
-    <!-- 标签筛选 -->
-    <div class="tag-filter" id="tagFilter"></div>
+    <div class="tabs">
+      <button class="tab active" id="tabList" onclick="showSection('list')">笔记列表</button>
+      <button class="tab" id="tabUpload" onclick="showSection('upload')">上传笔记</button>
+      <button class="tab" id="tabProfile" onclick="showSection('profile')" style="display:none;">个人主页</button>
+      <button class="tab" id="tabAccount" onclick="showSection('account')">登录 / 注册</button>
+    </div>
 
-    <!-- 笔记列表 -->
-    <ul class="note-list" id="noteList"></ul>
+    <div id="sectionList">
+      <ul class="note-list" id="noteList"></ul>
+    </div>
+
+    <div id="sectionUpload" style="display:none;">
+      <div class="error-box" id="uploadError"></div>
+      <form id="noteUploadForm" onsubmit="submitNote(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="noteTitle">标题 *</label>
+            <input id="noteTitle" type="text" maxlength="120" placeholder="请输入笔记标题" required />
+          </div>
+          <div class="form-group">
+            <label for="noteFilename">文件名（选填）</label>
+            <input id="noteFilename" type="text" placeholder="例如 my-note.md" />
+            <div class="form-note">不填则根据标题自动生成，文件名会转为安全格式。</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="noteFile">从本地选择 Markdown 文件</label>
+          <input id="noteFile" type="file" accept=".md,text/markdown" />
+          <div class="form-note">选择本地 .md 文件后会自动加载标题与内容。</div>
+        </div>
+        <div class="form-group">
+          <label for="noteContent">Markdown 内容 *</label>
+          <textarea id="noteContent" placeholder="请输入 Markdown 内容" required></textarea>
+        </div>
+        <div class="form-group" id="uploadKeyGroup">
+          <label for="uploadKey">上传密码（未登录时使用）</label>
+          <input id="uploadKey" type="password" placeholder="未登录时请输入上传密码" />
+        </div>
+        <button type="submit" class="btn">上传笔记</button>
+      </form>
+    </div>
+
+    <div id="sectionAccount" style="display:none;">
+      <div class="error-box" id="accountError"></div>
+      <div id="loginForm">
+        <h3 style="margin-bottom:.75rem;">登录</h3>
+        <div class="form-group">
+          <label for="loginUsername">用户名</label>
+          <input id="loginUsername" type="text" maxlength="30" placeholder="请输入用户名" />
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">密码</label>
+          <input id="loginPassword" type="password" placeholder="请输入密码" />
+        </div>
+        <button class="btn" onclick="doLogin()">登录</button>
+        <small style="margin-left:.75rem;color:var(--muted);cursor:pointer;" onclick="toggleAuthForm()">没有账号？去注册</small>
+      </div>
+      <div id="registerForm" style="display:none;">
+        <h3 style="margin-bottom:.75rem;">注册</h3>
+        <div class="form-group">
+          <label for="regUsername">用户名</label>
+          <input id="regUsername" type="text" maxlength="30" placeholder="请输入用户名" />
+        </div>
+        <div class="form-group">
+          <label for="regPassword">密码（至少4位）</label>
+          <input id="regPassword" type="password" placeholder="请输入密码" />
+        </div>
+        <div class="form-group">
+          <label for="regPassword2">确认密码</label>
+          <input id="regPassword2" type="password" placeholder="请再次输入密码" />
+        </div>
+        <button class="btn" onclick="doRegister()">注册</button>
+        <small style="margin-left:.75rem;color:var(--muted);cursor:pointer;" onclick="toggleAuthForm()">已有账号？去登录</small>
+      </div>
+    </div>
+
+    <div id="sectionProfile" style="display:none;">
+      <div class="error-box" id="profileError"></div>
+      <div id="profileViewSelf" style="display:none;">
+        <h3 style="margin-bottom:.75rem;">我的主页</h3>
+        <form id="profileForm" onsubmit="saveProfile(event)">
+          <div class="form-group">
+            <label for="profileDisplayName">显示名称</label>
+            <input id="profileDisplayName" type="text" maxlength="50" placeholder="请输入显示名称" />
+          </div>
+          <div class="form-group">
+            <label for="profileBio">个人简介</label>
+            <textarea id="profileBio" maxlength="500" placeholder="介绍一下自己..." style="min-height:100px;"></textarea>
+            <div class="form-note">最多 500 个字符。</div>
+          </div>
+          <div class="form-group">
+            <label>主页可见性</label>
+            <div style="display:flex;gap:1.5rem;margin-top:.35rem;">
+              <label><input type="radio" name="privacy" value="public" checked /> 公开</label>
+              <label><input type="radio" name="privacy" value="private" /> 私密</label>
+            </div>
+          </div>
+          <button type="submit" class="btn">保存</button>
+        </form>
+      </div>
+      <div id="profileViewOther" style="display:none;">
+        <h3 id="profileOtherTitle"></h3>
+        <p id="profileOtherBio" style="color:var(--muted);white-space:pre-wrap;margin:1rem 0;"></p>
+        <div id="profileOtherMeta" style="color:var(--muted);font-size:.9rem;"></div>
+      </div>
+      <div id="profilePrivate" style="display:none;text-align:center;color:var(--muted);padding:2rem;">
+        该用户已将主页设为私密。
+      </div>
+      <div id="profileNotFound" style="display:none;text-align:center;color:var(--muted);padding:2rem;">
+        用户不存在。
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- 笔记详情弹窗 -->
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this) closeModal()">
   <div class="modal">
     <button class="close-btn" onclick="closeModal()">✕</button>
     <h3 id="modalTitle"></h3>
-    <p class="modal-date" id="modalDate"></p>
-    <div class="modal-body" id="modalBody"></div>
+    <p id="modalMeta"></p>
+    <pre id="modalContent"></pre>
   </div>
 </div>
 
 <footer>© 2026 Yapeng Wang · Hosted on GitHub Pages</footer>
 
 <script>
-// ═══════════ 笔记数据 ═══════════
-const notes = [
-  {
-    id: 1,
-    title: "JUNO 中心探测器刻度策略",
-    date: "2025-06-15",
-    tags: ["探测器", "JUNO"],
-    preview: "总结 JUNO 中心探测器的刻度方案，包括激光刻度、放射源刻度以及 IBD 事例自刻度等方法。",
-    content: `## JUNO 中心探测器刻度策略
+const API_BASE = '';
+let notes = [];
+let userToken = localStorage.getItem('notes_token') || '';
+let username = localStorage.getItem('notes_username') || '';
 
-### 1. 刻度目标
-- 能量刻度：达到 < 1% 的能量分辨率不确定性
-- 时间刻度：PMT 时间偏移 < 1 ns
-- 位置重建：顶点分辨率 < 10 cm @ 1 MeV
+function showSection(name) {
+  document.getElementById('sectionList').style.display = name === 'list' ? 'block' : 'none';
+  document.getElementById('sectionUpload').style.display = name === 'upload' ? 'block' : 'none';
+  document.getElementById('sectionAccount').style.display = name === 'account' ? 'block' : 'none';
+  document.getElementById('sectionProfile').style.display = name === 'profile' ? 'block' : 'none';
+  document.getElementById('tabList').classList.toggle('active', name === 'list');
+  document.getElementById('tabUpload').classList.toggle('active', name === 'upload');
+  document.getElementById('tabAccount').classList.toggle('active', name === 'account');
+  document.getElementById('tabProfile').classList.toggle('active', name === 'profile');
 
-### 2. 刻度方法
-
-#### 2.1 激光刻度系统
-- 光纤激光系统覆盖全部 PMT
-- 监测 PMT 增益变化和定时偏移
-- 频率：每周一次
-
-#### 2.2 放射源刻度
-- 使用密封 γ 源沿中心轴扫描
-- 提供绝对能量刻度参考
-
-#### 2.3 自然本底刻度
-- IBD 延迟符合信号提供原位刻度
-- 利用 ^12B/^12N 等宇宙线产生的不稳定同位素
-
-### 3. 关键代码片段
-\`\`\`python
-# PMT gain calibration using laser data
-def calibrate_gain(laser_hits, nominal_gain=3e6):
-    for pmt_id, charge in laser_hits.items():
-        gain_factor = nominal_gain / charge.mean()
-        pmt_gains[pmt_id] *= gain_factor
-    return pmt_gains
-\`\`\``
-  },
-  {
-    id: 2,
-    title: "ROOT RDataFrame 使用技巧",
-    date: "2025-05-20",
-    tags: ["数据分析", "ROOT"],
-    preview: "记录使用 ROOT RDataFrame 进行高效数据分析的常用模式和技巧。",
-    content: `## ROOT RDataFrame 使用技巧
-
-### 声明式分析
-RDataFrame 提供声明式接口，适合处理 TTree 数据：
-
-\`\`\`cpp
-ROOT::RDataFrame df("tree", "data.root");
-auto h = df.Filter("energy > 0.5")
-           .Define("logE", "log(energy)")
-           .Histo1D({"h", "Energy spectrum", 100, -1, 4}, "logE");
-\`\`\`
-
-### 常用操作
-- **Filter**: 事例筛选
-- **Define**: 定义新变量（惰性求值）
-- **Histo1D/2D/3D**: 直方图填充
-- **Snapshot**: 保存中间结果到新 TTree
-- **Report**: 打印各 Filter 的通过率
-
-### 性能提示
-- 使用多线程：\`ROOT::EnableImplicitMT()\`
-- 链式操作尽量合并 Define
-- 大数据集使用 Snapshot 缓存中间结果`
-  },
-  {
-    id: 3,
-    title: "中微子振荡概率推导笔记",
-    date: "2025-04-10",
-    tags: ["物理", "中微子"],
-    preview: "从 PMNS 矩阵出发推导真空中微子振荡概率，包含两味和三味情形的详细推导。",
-    content: `## 中微子振荡概率推导
-
-### 两味振荡
-真空中的存活概率：
-
-$$P(\\nu_\\alpha \\to \\nu_\\alpha) = 1 - \\sin^2 2\\theta \\cdot \\sin^2\\left(\\frac{\\Delta m^2 L}{4E}\\right)$$
-
-转换概率：
-
-$$P(\\nu_\\alpha \\to \\nu_\\beta) = \\sin^2 2\\theta \\cdot \\sin^2\\left(\\frac{\\Delta m^2 L}{4E}\\right)$$
-
-### 三味振荡（真空）
-完整的三味振荡概率由 PMNS 矩阵 $U$ 给出：
-
-$$P(\\nu_\\alpha \\to \\nu_\\beta) = \\delta_{\\alpha\\beta} - 4\\sum_{i>j}\\Re(U_{\\alpha i}^* U_{\\beta i} U_{\\alpha j} U_{\\beta j}^*) \\sin^2\\frac{\\Delta m_{ij}^2 L}{4E}$$
-$$+ 2\\sum_{i>j}\\Im(U_{\\alpha i}^* U_{\\beta i} U_{\\alpha j} U_{\\beta j}^*) \\sin\\frac{\\Delta m_{ij}^2 L}{2E}$$
-
-### 物质效应
-在物质中，MSW 效应修改混合角：
-
-$$\\sin^2 2\\theta_m = \\frac{\\sin^2 2\\theta}{(\\cos 2\\theta - A/\\Delta m^2)^2 + \\sin^2 2\\theta}$$
-
-其中 $A = 2\\sqrt{2} G_F N_e E$。`
-  },
-  {
-    id: 4,
-    title: "CJPL 1-ton 原型探测器 Muon 本底研究",
-    date: "2025-03-05",
-    tags: ["探测器", "数据分析", "Muon"],
-    preview: "分析 CJPL 1-ton 原型探测器中宇宙线 muon 引起的本底事例率和特征。",
-    content: `## CJPL 1-ton 原型探测器 Muon 本底研究
-
-### 实验设置
-- 地点：中国锦屏地下实验室 (CJPL)
-- 岩石覆盖：约 2400 m
-- 探测器：1 吨液体闪烁体原型
-
-### Muon 通量
-在 CJPL 深度，muon 通量约为：
-$$\\Phi_\\mu \\approx 2 \\times 10^{-10} \\text{ cm}^{-2}\\text{s}^{-1}$$
-
-这比地表低了约 6 个数量级。
-
-### 分析方法
-1. 利用外置 muon 反符合探测器标记 muon 事例
-2. 分析 muon 引起的快中子本底
-3. 研究 muon 产生的 ^9Li/^8He 同位素本底
-
-### 初步结果
-- Muon 标记效率 > 99%
-- 残余 muon 引起的本底率 < 0.1 events/day/ton`
-  },
-  {
-    id: 5,
-    title: "Geant4 模拟液体闪烁体探测器",
-    date: "2025-02-18",
-    tags: ["探测器", "模拟", "Geant4"],
-    preview: "使用 Geant4 构建液体闪烁体探测器模型，模拟光产额和能量响应。",
-    content: `## Geant4 模拟液体闪烁体探测器
-
-### 探测器几何
-\`\`\`cpp
-G4double radius = 1.0 * m;
-G4double height = 2.0 * m;
-G4Tubs* solidDet = new G4Tubs("Detector", 0, radius, height/2, 0, 2*CLHEP::pi);
-G4LogicalVolume* logicDet = new G4LogicalVolume(solidDet, LS, "Detector");
-\`\`\`
-
-### 光学过程
-必须包含的关键物理过程：
-- G4Scintillation (闪烁光)
-- G4OpAbsorption (光吸收)
-- G4OpRayleigh (瑞利散射)
-- G4OpBoundaryProcess (边界反射/折射)
-
-### 光产额设置
-\`\`\`cpp
-G4MaterialPropertiesTable* mpt = new G4MaterialPropertiesTable();
-mpt->AddConstProperty("SCINTILLATIONYIELD", 10000./MeV);
-mpt->AddConstProperty("RESOLUTIONSCALE", 1.0);
-LS->SetMaterialPropertiesTable(mpt);
-\`\`\``
-  },
-  {
-    id: 6,
-    title: "PMT 增益刻度与单光电子谱",
-    date: "2025-01-22",
-    tags: ["探测器", "PMT"],
-    preview: "通过单光电子谱拟合确定 PMT 增益，讨论不同拟合方法的优劣。",
-    content: `## PMT 增益刻度
-
-### 单光电子谱 (SPE)
-低光强下的 PMT 电荷谱由多个高斯峰组成：
-$$f(x) = \\sum_{n=0}^{\\infty} \\frac{\\mu^n e^{-\\mu}}{n!} \\cdot \\frac{1}{\\sqrt{2\\pi n}\\sigma_1} \\exp\\left(-\\frac{(x - n Q_1)^2}{2n\\sigma_1^2}\\right)$$
-
-### 拟合方法
-1. **多高斯拟合**：直接拟合前 3-4 个峰
-2. **极大似然法**：考虑完整的光电子统计
-3. **简化方法**：低光强下用指数+高斯拟合 pedestal 和单光电子峰
-
-### ROOT 实现
-\`\`\`cpp
-TF1* speFit = new TF1("spe", speFunction, -50, 500, 4);
-speFit->SetParameters(pedMean, pedSigma, gain, gainSigma);
-hist->Fit(speFit, "LR");
-double gain = speFit->GetParameter(2);
-\`\`\``
+  if (name === 'profile' && username) {
+    loadMyProfile();
   }
-];
 
-// ═══════════ 渲染笔记列表 ═══════════
-let activeTag = null;
-
-function getAllTags() {
-  const tagSet = new Set();
-  notes.forEach(n => n.tags.forEach(t => tagSet.add(t)));
-  return [...tagSet].sort();
+  if (name === 'upload') {
+    const keyGroup = document.getElementById('uploadKeyGroup');
+    if (userToken) {
+      keyGroup.style.display = 'none';
+      document.getElementById('uploadKey').required = false;
+    } else {
+      keyGroup.style.display = 'block';
+      document.getElementById('uploadKey').required = true;
+    }
+  }
 }
 
-function renderTagFilter() {
-  const container = document.getElementById('tagFilter');
-  const tags = getAllTags();
-  container.innerHTML = tags.map(t =>
-    `<span class="tag-chip${t === activeTag ? ' active' : ''}" onclick="toggleTag('${t}')">${t}</span>`
-  ).join('');
+function updateUserBar() {
+  const bar = document.getElementById('userWelcome');
+  const btn = document.getElementById('userActionBtn');
+  const tabProfile = document.getElementById('tabProfile');
+  if (username) {
+    bar.innerHTML = '👤 <span style="cursor:pointer;text-decoration:underline;" onclick="showSection(\'profile\')">' + username + '</span>';
+    btn.textContent = '退出登录';
+    btn.onclick = doLogout;
+    tabProfile.style.display = '';
+  } else {
+    bar.textContent = '未登录';
+    btn.textContent = '登录 / 注册';
+    btn.onclick = () => showSection('account');
+    tabProfile.style.display = 'none';
+  }
 }
 
-function toggleTag(tag) {
-  activeTag = (activeTag === tag) ? null : tag;
-  renderTagFilter();
-  renderNotes();
+function toggleAuthForm() {
+  const login = document.getElementById('loginForm');
+  const register = document.getElementById('registerForm');
+  const err = document.getElementById('accountError');
+  err.style.display = 'none';
+  if (login.style.display === 'none') {
+    login.style.display = 'block';
+    register.style.display = 'none';
+  } else {
+    login.style.display = 'none';
+    register.style.display = 'block';
+  }
 }
 
-function renderNotes() {
-  const search = document.getElementById('searchInput').value.toLowerCase();
+async function apiRequest(url, options = {}) {
+  const res = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.error || `请求失败 (${res.status})`);
+  }
+  return data;
+}
+
+function renderNoteList() {
   const list = document.getElementById('noteList');
-
-  const filtered = notes.filter(n => {
-    const matchSearch = !search || n.title.toLowerCase().includes(search) || n.preview.toLowerCase().includes(search) || n.tags.some(t => t.toLowerCase().includes(search));
-    const matchTag = !activeTag || n.tags.includes(activeTag);
-    return matchSearch && matchTag;
-  });
-
-  list.innerHTML = filtered.map(n => `
-    <li class="note-item">
-      <div class="note-title" onclick="openNote(${n.id})">${n.title}</div>
-      <div class="note-meta">${n.date} · ${n.tags.map(t => `<span class="note-tag">${t}</span>`).join(' ')}</div>
-      <div class="note-preview">${n.preview}</div>
+  if (!notes.length) {
+    list.innerHTML = '<li class="note-empty">暂无笔记，您可以上传第一篇笔记。</li>';
+    return;
+  }
+  list.innerHTML = notes.map(note => `
+    <li class="note-item" onclick="openNote('${encodeURIComponent(note.filename)}')">
+      <div class="note-title">${note.title}</div>
+      <div class="note-meta">${note.author ? '<span class="note-author" onclick="event.stopPropagation();viewProfile(\'' + note.author + '\')">' + note.author + '</span> · ' : ''}${new Date(note.created_at).toLocaleString()}</div>
     </li>
-  `).join('') || '<li style="color:var(--muted);text-align:center;padding:2rem;">没有找到匹配的笔记 📭</li>';
+  `).join('');
 }
 
-function openNote(id) {
-  const n = notes.find(x => x.id === id);
-  if (!n) return;
-  document.getElementById('modalTitle').textContent = n.title;
-  document.getElementById('modalDate').textContent = n.date + ' · ' + n.tags.join(', ');
-  // 简单 Markdown → HTML
-  let html = n.content
-    .replace(/### (.+)/g, '<h4>$1</h4>')
-    .replace(/## (.+)/g, '<h3>$1</h3>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/`{3}(\w*)\n([\s\S]*?)`{3}/g, '<pre><code>$2</code></pre>')
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
-    .replace(/^- (.+)/gm, '<li>$1</li>')
-    .replace(/(<li>[\s\S]*?<\/li>)/g, '<ul>$1</ul>')
-    .replace(/\n/g, '<br>');
-  // 渲染 KaTeX 公式
-  html = html.replace(/\$\$([\s\S]*?)\$\$/g, (_, tex) => {
-    try { return katex.renderToString(tex, { throwOnError: false, displayMode: true }); } catch(e) { return `<em>${tex}</em>`; }
-  });
-  html = html.replace(/\$([^$]+)\$/g, (_, tex) => {
-    try { return katex.renderToString(tex, { throwOnError: false, displayMode: false }); } catch(e) { return `<em>${tex}</em>`; }
-  });
-  document.getElementById('modalBody').innerHTML = html;
-  document.getElementById('modalOverlay').classList.add('open');
+async function loadNotes() {
+  try {
+    const data = await apiRequest(`${API_BASE}/api/notes`);
+    notes = data.data.notes;
+    renderNoteList();
+  } catch (err) {
+    document.getElementById('noteList').innerHTML = `<li class="note-empty">加载笔记失败：${err.message}</li>`;
+  }
+}
+
+async function openNote(filename) {
+  try {
+    const data = await apiRequest(`${API_BASE}/api/notes/${filename}`);
+    document.getElementById('modalTitle').textContent = data.data.filename;
+    document.getElementById('modalMeta').textContent = '';
+    document.getElementById('modalContent').textContent = data.data.content;
+    document.getElementById('modalOverlay').classList.add('open');
+  } catch (err) {
+    alert('读取笔记失败：' + err.message);
+  }
 }
 
 function closeModal() {
   document.getElementById('modalOverlay').classList.remove('open');
 }
 
-// 键盘关闭弹窗
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+async function loadLocalFile() {
+  const fileInput = document.getElementById('noteFile');
+  const file = fileInput.files[0];
+  if (!file) return;
+  const name = file.name || '';
+  if (!name.toLowerCase().endsWith('.md')) {
+    alert('请选择 .md 格式的文件。');
+    fileInput.value = '';
+    return;
+  }
+  const text = await file.text();
+  if (!document.getElementById('noteTitle').value.trim()) {
+    const firstLine = text.split(/\r?\n/)[0] || '';
+    document.getElementById('noteTitle').value = firstLine.replace(/^#\s*/, '').trim();
+  }
+  if (!document.getElementById('noteFilename').value.trim()) {
+    document.getElementById('noteFilename').value = name;
+  }
+  document.getElementById('noteContent').value = text;
+}
 
-// 初始化
-renderTagFilter();
-renderNotes();
+async function submitNote(event) {
+  event.preventDefault();
+  const title = document.getElementById('noteTitle').value.trim();
+  const content = document.getElementById('noteContent').value.trim();
+  const uploadKey = document.getElementById('uploadKey').value.trim();
+  const filename = document.getElementById('noteFilename').value.trim();
+  const errorBox = document.getElementById('uploadError');
+
+  if (!title || !content) {
+    errorBox.textContent = '请填写标题和内容。';
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  const body = { title, content, filename };
+  if (userToken) {
+    body.token = userToken;
+  } else {
+    if (!uploadKey) {
+      errorBox.textContent = '请先登录或输入上传密码。';
+      errorBox.style.display = 'block';
+      return;
+    }
+    body.upload_key = uploadKey;
+  }
+
+  try {
+    await apiRequest(`${API_BASE}/api/notes`, {
+      method: 'POST',
+      body: JSON.stringify(body)
+    });
+    errorBox.style.display = 'none';
+    document.getElementById('noteUploadForm').reset();
+    await loadNotes();
+    showSection('list');
+  } catch (err) {
+    errorBox.textContent = err.message;
+    errorBox.style.display = 'block';
+  }
+}
+
+async function doLogin() {
+  const usernameInput = document.getElementById('loginUsername').value.trim();
+  const passwordInput = document.getElementById('loginPassword').value.trim();
+  const err = document.getElementById('accountError');
+
+  if (!usernameInput || !passwordInput) {
+    err.textContent = '请填写用户名和密码。';
+    err.style.display = 'block';
+    return;
+  }
+  try {
+    const data = await apiRequest(`${API_BASE}/api/users/login`, {
+      method: 'POST',
+      body: JSON.stringify({ username: usernameInput, password: passwordInput })
+    });
+    userToken = data.data.token;
+    username = data.data.username;
+    localStorage.setItem('notes_token', userToken);
+    localStorage.setItem('notes_username', username);
+    updateUserBar();
+    err.style.display = 'none';
+    showSection('list');
+    document.getElementById('loginUsername').value = '';
+    document.getElementById('loginPassword').value = '';
+  } catch (e) {
+    err.textContent = e.message;
+    err.style.display = 'block';
+  }
+}
+
+async function doRegister() {
+  const usernameInput = document.getElementById('regUsername').value.trim();
+  const password = document.getElementById('regPassword').value.trim();
+  const password2 = document.getElementById('regPassword2').value.trim();
+  const err = document.getElementById('accountError');
+
+  if (!usernameInput || !password) {
+    err.textContent = '请填写用户名和密码。';
+    err.style.display = 'block';
+    return;
+  }
+  if (password !== password2) {
+    err.textContent = '两次密码不一致。';
+    err.style.display = 'block';
+    return;
+  }
+  if (password.length < 4) {
+    err.textContent = '密码至少 4 个字符。';
+    err.style.display = 'block';
+    return;
+  }
+  try {
+    const data = await apiRequest(`${API_BASE}/api/users/register`, {
+      method: 'POST',
+      body: JSON.stringify({ username: usernameInput, password })
+    });
+    userToken = data.data.token;
+    username = data.data.username;
+    localStorage.setItem('notes_token', userToken);
+    localStorage.setItem('notes_username', username);
+    updateUserBar();
+    err.style.display = 'none';
+    showSection('list');
+    document.getElementById('regUsername').value = '';
+    document.getElementById('regPassword').value = '';
+    document.getElementById('regPassword2').value = '';
+  } catch (e) {
+    err.textContent = e.message;
+    err.style.display = 'block';
+  }
+}
+
+async function loadMyProfile() {
+  if (!username || !userToken) return;
+  try {
+    const data = await apiRequest(`${API_BASE}/api/users/me?token=${encodeURIComponent(userToken)}`);
+    document.getElementById('profileDisplayName').value = data.data.display_name || '';
+    document.getElementById('profileBio').value = data.data.bio || '';
+    const privacy = data.data.privacy || 'public';
+    document.querySelector('input[name="privacy"][value="' + privacy + '"]').checked = true;
+    document.getElementById('profileViewSelf').style.display = 'block';
+    document.getElementById('profileViewOther').style.display = 'none';
+    document.getElementById('profilePrivate').style.display = 'none';
+    document.getElementById('profileNotFound').style.display = 'none';
+  } catch (e) {
+    document.getElementById('profileError').textContent = e.message;
+    document.getElementById('profileError').style.display = 'block';
+  }
+}
+
+async function saveProfile(event) {
+  event.preventDefault();
+  const displayName = document.getElementById('profileDisplayName').value.trim();
+  const bio = document.getElementById('profileBio').value.trim();
+  const privacy = document.querySelector('input[name="privacy"]:checked').value;
+  const err = document.getElementById('profileError');
+
+  try {
+    await apiRequest(`${API_BASE}/api/profile`, {
+      method: 'PUT',
+      body: JSON.stringify({ token: userToken, display_name: displayName, bio, privacy })
+    });
+    err.style.display = 'none';
+    alert('个人信息已保存。');
+  } catch (e) {
+    err.textContent = e.message;
+    err.style.display = 'block';
+  }
+}
+
+async function viewProfile(targetUser) {
+  showSection('profile');
+  document.getElementById('profileViewSelf').style.display = 'none';
+  document.getElementById('profileViewOther').style.display = 'none';
+  document.getElementById('profilePrivate').style.display = 'none';
+  document.getElementById('profileNotFound').style.display = 'none';
+  document.getElementById('profileError').style.display = 'none';
+
+  if (targetUser === username) {
+    loadMyProfile();
+    return;
+  }
+
+  try {
+    const data = await apiRequest(`${API_BASE}/api/profile/${encodeURIComponent(targetUser)}`);
+    if (data.data.privacy === 'private') {
+      document.getElementById('profilePrivate').style.display = 'block';
+      return;
+    }
+    document.getElementById('profileOtherTitle').textContent = '👤 ' + (data.data.display_name || data.data.username);
+    document.getElementById('profileOtherBio').textContent = data.data.bio || '该用户还没有填写简介。';
+    document.getElementById('profileOtherMeta').innerHTML =
+      '笔记数：' + (data.data.notes_count || 0) +
+      ' · 注册于 ' + new Date(data.data.created_at).toLocaleDateString();
+    document.getElementById('profileViewOther').style.display = 'block';
+  } catch (e) {
+    if (e.message.includes('404') || e.message.includes('不存在')) {
+      document.getElementById('profileNotFound').style.display = 'block';
+    } else {
+      document.getElementById('profileError').textContent = e.message;
+      document.getElementById('profileError').style.display = 'block';
+    }
+  }
+}
+
+async function doLogout() {
+  try {
+    if (userToken) {
+      await apiRequest(`${API_BASE}/api/users/logout`, {
+        method: 'POST',
+        body: JSON.stringify({ token: userToken })
+      });
+    }
+  } catch (e) { /* ignore */ }
+  userToken = '';
+  username = '';
+  localStorage.removeItem('notes_token');
+  localStorage.removeItem('notes_username');
+  updateUserBar();
+  showSection('list');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  updateUserBar();
+  loadNotes();
+  const noteFile = document.getElementById('noteFile');
+  if (noteFile) {
+    noteFile.addEventListener('change', loadLocalFile);
+  }
+});
 </script>
-
-<!-- KaTeX for math rendering -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 
 </body>
 </html>
