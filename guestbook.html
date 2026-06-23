@@ -124,7 +124,8 @@
   <!-- 留言表单 -->
   <div class="card">
     <h2>💬 留言板</h2>
-    <p style="color:var(--muted);font-size:.9rem;margin-bottom:1rem;">欢迎留下你的足迹！所有留言会保存在浏览器本地存储中。</p>
+    <p style="color:var(--muted);font-size:.9rem;margin-bottom:1rem;">欢迎留下你的足迹！留言数据存储在服务器上，所有人可见。</p>
+    <div id="formError" style="color:#dc3545;font-size:.85rem;margin-bottom:.5rem;display:none;"></div>
     <form id="msgForm" onsubmit="submitMessage(event)">
       <div class="form-row">
         <div class="form-group">
@@ -157,21 +158,34 @@
 <footer>© 2026 Yapeng Wang · Hosted on GitHub Pages</footer>
 
 <script>
-// ═══════════ 留言数据管理 ═══════════
-const STORAGE_KEY = 'yapeng_guestbook_messages';
+// ═══════════ 服务器 API 配置 ═══════════
+// 自动检测：同源访问时使用相对路径，否则使用配置的地址
+const API_BASE = window.GUESTBOOK_API_BASE || (
+  window.location.port === '5000' ? '' : 'http://localhost:5000'
+);
 const MSGS_PER_PAGE = 5;
 let currentPage = 1;
+let totalPages = 1;
+let totalMessages = 0;
 
-function loadMessages() {
+// ═══════════ API 请求封装 ═══════════
+async function apiRequest(url, options = {}) {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-  } catch(e) {
-    return [];
+    const res = await fetch(url, {
+      headers: { 'Content-Type': 'application/json' },
+      ...options
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || `请求失败 (${res.status})`);
+    }
+    return data;
+  } catch (err) {
+    if (err.message === 'Failed to fetch') {
+      throw new Error('无法连接到服务器，请确保服务器已启动');
+    }
+    throw err;
   }
-}
-
-function saveMessages(msgs) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs));
 }
 
 // ═══════════ 头像颜色 ═══════════
@@ -183,104 +197,136 @@ function avatarColor(name) {
 }
 
 // ═══════════ 提交留言 ═══════════
-function submitMessage(e) {
+async function submitMessage(e) {
   e.preventDefault();
+
   const name = document.getElementById('msgName').value.trim();
   const email = document.getElementById('msgEmail').value.trim();
   const content = document.getElementById('msgContent').value.trim();
+  const submitBtn = document.querySelector('#msgForm .btn');
+  const errorDiv = document.getElementById('formError');
 
   if (!name || !content) return;
 
-  const msg = {
-    id: Date.now(),
-    name,
-    email,
-    content,
-    time: new Date().toISOString(),
-    replyTo: null
-  };
+  // 禁用按钮，显示加载状态
+  submitBtn.disabled = true;
+  submitBtn.textContent = '⏳ 发送中...';
+  errorDiv.style.display = 'none';
 
-  const msgs = loadMessages();
-  msgs.unshift(msg);
-  saveMessages(msgs);
+  try {
+    await apiRequest(`${API_BASE}/api/messages`, {
+      method: 'POST',
+      body: JSON.stringify({ name, email, content })
+    });
 
-  // 清空表单
-  document.getElementById('msgName').value = '';
-  document.getElementById('msgEmail').value = '';
-  document.getElementById('msgContent').value = '';
-  updateCharCount();
+    // 清空表单
+    document.getElementById('msgName').value = '';
+    document.getElementById('msgEmail').value = '';
+    document.getElementById('msgContent').value = '';
+    updateCharCount();
 
-  currentPage = 1;
-  renderMessages();
+    currentPage = 1;
+    await loadMessages();
+  } catch (err) {
+    errorDiv.textContent = '❌ ' + err.message;
+    errorDiv.style.display = 'block';
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = '✉️ 发布留言';
+  }
 }
 
 // ═══════════ 删除留言 ═══════════
-function deleteMessage(id) {
+async function deleteMessage(id) {
   if (!confirm('确定要删除这条留言吗？')) return;
-  let msgs = loadMessages();
-  msgs = msgs.filter(m => m.id !== id);
-  saveMessages(msgs);
-  renderMessages();
+
+  // 弹出删除密钥输入框
+  const deleteKey = prompt('请输入管理员删除密钥：');
+  if (!deleteKey) return;
+
+  try {
+    await apiRequest(`${API_BASE}/api/messages/${id}`, {
+      method: 'DELETE',
+      body: JSON.stringify({ delete_key: deleteKey })
+    });
+    await loadMessages();
+  } catch (err) {
+    alert('删除失败：' + err.message);
+  }
 }
 
-// ═══════════ 渲染留言 ═══════════
-function renderMessages() {
-  const msgs = loadMessages();
-  const totalPages = Math.ceil(msgs.length / MSGS_PER_PAGE) || 1;
-
-  // 确保当前页有效
-  if (currentPage > totalPages) currentPage = totalPages;
-  if (currentPage < 1) currentPage = 1;
-
-  const start = (currentPage - 1) * MSGS_PER_PAGE;
-  const pageMsgs = msgs.slice(start, start + MSGS_PER_PAGE);
-
-  // 计数
-  document.getElementById('msgCount').textContent = `(${msgs.length} 条留言)`;
-
-  // 列表
+// ═══════════ 加载留言 ═══════════
+async function loadMessages() {
   const list = document.getElementById('msgList');
-  if (pageMsgs.length === 0) {
-    list.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>还没有留言，来做第一个留言的人吧！</p></div>`;
-  } else {
-    list.innerHTML = pageMsgs.map(m => {
-      const timeStr = new Date(m.time).toLocaleString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
-      const initial = m.name.charAt(0).toUpperCase();
-      const color = avatarColor(m.name);
-      return `
-        <div class="msg-card">
-          <div class="msg-header">
-            <span class="msg-author">
-              <span class="msg-avatar" style="background:${color}">${initial}</span>
-              ${escapeHtml(m.name)}
-            </span>
-            <span class="msg-time">${timeStr}</span>
-          </div>
-          <div class="msg-body">${escapeHtml(m.content)}</div>
-          <div class="msg-actions">
-            <button class="btn-sm danger" onclick="deleteMessage(${m.id})">🗑 删除</button>
-          </div>
-        </div>`;
-    }).join('');
-  }
+  const countEl = document.getElementById('msgCount');
+  const pagEl = document.getElementById('pagination');
 
-  // 分页
-  const pag = document.getElementById('pagination');
-  if (totalPages <= 1) {
-    pag.innerHTML = '';
-  } else {
-    let html = `<button ${currentPage === 1 ? 'disabled' : ''} onclick="goPage(${currentPage - 1})">← 上一页</button>`;
-    for (let i = 1; i <= totalPages; i++) {
-      html += `<button class="${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
+  // 显示加载状态
+  list.innerHTML = `<div class="empty-state"><div class="icon">⏳</div><p>加载中...</p></div>`;
+  countEl.textContent = '';
+  pagEl.innerHTML = '';
+
+  try {
+    const result = await apiRequest(
+      `${API_BASE}/api/messages?page=${currentPage}&per_page=${MSGS_PER_PAGE}`
+    );
+    const { messages, total, page, total_pages } = result.data;
+    totalMessages = total;
+    totalPages = total_pages;
+
+    // 确保当前页有效
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    // 计数
+    countEl.textContent = `(${total} 条留言)`;
+
+    // 列表
+    if (messages.length === 0) {
+      list.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>还没有留言，来做第一个留言的人吧！</p></div>`;
+    } else {
+      list.innerHTML = messages.map(m => {
+        const timeStr = new Date(m.time).toLocaleString('zh-CN', {
+          year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'
+        });
+        const initial = m.name.charAt(0).toUpperCase();
+        const color = avatarColor(m.name);
+        return `
+          <div class="msg-card">
+            <div class="msg-header">
+              <span class="msg-author">
+                <span class="msg-avatar" style="background:${color}">${initial}</span>
+                ${escapeHtml(m.name)}
+              </span>
+              <span class="msg-time">${timeStr}</span>
+            </div>
+            <div class="msg-body">${escapeHtml(m.content)}</div>
+            <div class="msg-actions">
+              <button class="btn-sm danger" onclick="deleteMessage(${m.id})">🗑 删除</button>
+            </div>
+          </div>`;
+      }).join('');
     }
-    html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="goPage(${currentPage + 1})">下一页 →</button>`;
-    pag.innerHTML = html;
+
+    // 分页
+    if (totalPages <= 1) {
+      pagEl.innerHTML = '';
+    } else {
+      let html = `<button ${currentPage === 1 ? 'disabled' : ''} onclick="goPage(${currentPage - 1})">← 上一页</button>`;
+      for (let i = 1; i <= totalPages; i++) {
+        html += `<button class="${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
+      }
+      html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="goPage(${currentPage + 1})">下一页 →</button>`;
+      pagEl.innerHTML = html;
+    }
+  } catch (err) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><p>加载失败：${escapeHtml(err.message)}</p><p style="font-size:.85rem;margin-top:.5rem;">请确保留言板服务器已启动</p></div>`;
   }
 }
 
 function goPage(p) {
   currentPage = p;
-  renderMessages();
+  loadMessages();
   document.getElementById('msgList').scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -296,7 +342,7 @@ function escapeHtml(str) {
 }
 
 // 初始化
-renderMessages();
+loadMessages();
 updateCharCount();
 </script>
 
