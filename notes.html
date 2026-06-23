@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>笔记 · Yapeng</title>
+  <style>
+    :root {
+      --bg: #f8f9fa; --card-bg: #ffffff; --text: #212529; --muted: #6c757d;
+      --accent: #0d6efd; --border: #dee2e6; --radius: 12px; --shadow: 0 1px 3px rgba(0,0,0,.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Noto Sans SC", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.7;
+      min-height: 100vh; display: flex; flex-direction: column;
+    }
+    .navbar {
+      background: var(--card-bg); border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100;
+    }
+    .navbar-inner {
+      max-width: 960px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between; padding: .75rem 1.5rem;
+    }
+    .navbar .brand { font-size: 1.25rem; font-weight: 700; color: var(--text); text-decoration: none; }
+    .navbar .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+    .navbar .nav-links a { text-decoration: none; color: var(--muted); font-weight: 500; transition: color .15s; }
+    .navbar .nav-links a:hover, .navbar .nav-links a.active { color: var(--accent); }
+
+    .main { max-width: 960px; margin: 2rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
+    .card {
+      background: var(--card-bg); border-radius: var(--radius);
+      box-shadow: var(--shadow); border: 1px solid var(--border); padding: 2rem; margin-bottom: 1.5rem;
+    }
+    .card h2 { font-size: 1.35rem; margin-bottom: 1rem; padding-bottom: .5rem; border-bottom: 2px solid var(--accent); }
+
+    /* ── 搜索 & 筛选 ── */
+    .filter-bar { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .filter-bar input {
+      flex: 1; min-width: 200px; padding: .6rem 1rem;
+      border: 1px solid var(--border); border-radius: 8px; font-size: .95rem;
+    }
+    .tag-filter { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .tag-chip {
+      padding: .3rem .8rem; border-radius: 20px; font-size: .8rem; cursor: pointer;
+      border: 1px solid var(--border); background: #fff; color: var(--muted); transition: all .15s;
+    }
+    .tag-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* ── 笔记列表 ── */
+    .note-list { list-style: none; }
+    .note-item {
+      padding: 1rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: .75rem;
+      transition: box-shadow .15s;
+    }
+    .note-item:hover { box-shadow: var(--shadow); }
+    .note-item .note-title { font-size: 1.05rem; font-weight: 600; color: var(--accent); cursor: pointer; }
+    .note-item .note-meta { font-size: .8rem; color: var(--muted); margin: .25rem 0; }
+    .note-item .note-preview { font-size: .9rem; color: var(--text); margin-top: .3rem; }
+    .note-tag {
+      display: inline-block; background: #e7f1ff; color: var(--accent);
+      padding: .1rem .5rem; border-radius: 10px; font-size: .75rem; margin-right: .3rem;
+    }
+
+    /* ── 笔记详情弹窗 ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5);
+      z-index: 200; align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: var(--radius); padding: 2rem;
+      max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto; position: relative;
+    }
+    .modal .close-btn {
+      position: absolute; top: 1rem; right: 1rem;
+      background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--muted);
+    }
+    .modal h3 { margin-bottom: .5rem; }
+    .modal .modal-date { color: var(--muted); font-size: .85rem; margin-bottom: 1rem; }
+    .modal .modal-body { line-height: 1.8; }
+    .modal .modal-body pre {
+      background: #f5f5f5; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: .9rem;
+    }
+
+    footer {
+      text-align: center; padding: 1.5rem; color: var(--muted);
+      font-size: .85rem; border-top: 1px solid var(--border); margin-top: 2rem;
+    }
+    @media (max-width: 600px) { .navbar-inner { flex-direction: column; gap: .5rem; } }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a class="brand" href="index.html">🏠 Yapeng</a>
+    <ul class="nav-links">
+      <li><a href="index.html">简历</a></li>
+      <li><a href="notes.html" class="active">笔记</a></li>
+      <li><a href="guestbook.html">留言板</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="card">
+    <h2>📝 个人笔记</h2>
+
+    <!-- 搜索框 -->
+    <div class="filter-bar">
+      <input type="text" id="searchInput" placeholder="🔍 搜索笔记..." oninput="renderNotes()" />
+    </div>
+
+    <!-- 标签筛选 -->
+    <div class="tag-filter" id="tagFilter"></div>
+
+    <!-- 笔记列表 -->
+    <ul class="note-list" id="noteList"></ul>
+  </div>
+</div>
+
+<!-- 笔记详情弹窗 -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this) closeModal()">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <h3 id="modalTitle"></h3>
+    <p class="modal-date" id="modalDate"></p>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<footer>© 2026 Yapeng Wang · Hosted on GitHub Pages</footer>
+
+<script>
+// ═══════════ 笔记数据 ═══════════
+const notes = [
+  {
+    id: 1,
+    title: "JUNO 中心探测器刻度策略",
+    date: "2025-06-15",
+    tags: ["探测器", "JUNO"],
+    preview: "总结 JUNO 中心探测器的刻度方案，包括激光刻度、放射源刻度以及 IBD 事例自刻度等方法。",
+    content: `## JUNO 中心探测器刻度策略
+
+### 1. 刻度目标
+- 能量刻度：达到 < 1% 的能量分辨率不确定性
+- 时间刻度：PMT 时间偏移 < 1 ns
+- 位置重建：顶点分辨率 < 10 cm @ 1 MeV
+
+### 2. 刻度方法
+
+#### 2.1 激光刻度系统
+- 光纤激光系统覆盖全部 PMT
+- 监测 PMT 增益变化和定时偏移
+- 频率：每周一次
+
+#### 2.2 放射源刻度
+- 使用密封 γ 源沿中心轴扫描
+- 提供绝对能量刻度参考
+
+#### 2.3 自然本底刻度
+- IBD 延迟符合信号提供原位刻度
+- 利用 ^12B/^12N 等宇宙线产生的不稳定同位素
+
+### 3. 关键代码片段
+\`\`\`python
+# PMT gain calibration using laser data
+def calibrate_gain(laser_hits, nominal_gain=3e6):
+    for pmt_id, charge in laser_hits.items():
+        gain_factor = nominal_gain / charge.mean()
+        pmt_gains[pmt_id] *= gain_factor
+    return pmt_gains
+\`\`\``
+  },
+  {
+    id: 2,
+    title: "ROOT RDataFrame 使用技巧",
+    date: "2025-05-20",
+    tags: ["数据分析", "ROOT"],
+    preview: "记录使用 ROOT RDataFrame 进行高效数据分析的常用模式和技巧。",
+    content: `## ROOT RDataFrame 使用技巧
+
+### 声明式分析
+RDataFrame 提供声明式接口，适合处理 TTree 数据：
+
+\`\`\`cpp
+ROOT::RDataFrame df("tree", "data.root");
+auto h = df.Filter("energy > 0.5")
+           .Define("logE", "log(energy)")
+           .Histo1D({"h", "Energy spectrum", 100, -1, 4}, "logE");
+\`\`\`
+
+### 常用操作
+- **Filter**: 事例筛选
+- **Define**: 定义新变量（惰性求值）
+- **Histo1D/2D/3D**: 直方图填充
+- **Snapshot**: 保存中间结果到新 TTree
+- **Report**: 打印各 Filter 的通过率
+
+### 性能提示
+- 使用多线程：\`ROOT::EnableImplicitMT()\`
+- 链式操作尽量合并 Define
+- 大数据集使用 Snapshot 缓存中间结果`
+  },
+  {
+    id: 3,
+    title: "中微子振荡概率推导笔记",
+    date: "2025-04-10",
+    tags: ["物理", "中微子"],
+    preview: "从 PMNS 矩阵出发推导真空中微子振荡概率，包含两味和三味情形的详细推导。",
+    content: `## 中微子振荡概率推导
+
+### 两味振荡
+真空中的存活概率：
+
+$$P(\\nu_\\alpha \\to \\nu_\\alpha) = 1 - \\sin^2 2\\theta \\cdot \\sin^2\\left(\\frac{\\Delta m^2 L}{4E}\\right)$$
+
+转换概率：
+
+$$P(\\nu_\\alpha \\to \\nu_\\beta) = \\sin^2 2\\theta \\cdot \\sin^2\\left(\\frac{\\Delta m^2 L}{4E}\\right)$$
+
+### 三味振荡（真空）
+完整的三味振荡概率由 PMNS 矩阵 $U$ 给出：
+
+$$P(\\nu_\\alpha \\to \\nu_\\beta) = \\delta_{\\alpha\\beta} - 4\\sum_{i>j}\\Re(U_{\\alpha i}^* U_{\\beta i} U_{\\alpha j} U_{\\beta j}^*) \\sin^2\\frac{\\Delta m_{ij}^2 L}{4E}$$
+$$+ 2\\sum_{i>j}\\Im(U_{\\alpha i}^* U_{\\beta i} U_{\\alpha j} U_{\\beta j}^*) \\sin\\frac{\\Delta m_{ij}^2 L}{2E}$$
+
+### 物质效应
+在物质中，MSW 效应修改混合角：
+
+$$\\sin^2 2\\theta_m = \\frac{\\sin^2 2\\theta}{(\\cos 2\\theta - A/\\Delta m^2)^2 + \\sin^2 2\\theta}$$
+
+其中 $A = 2\\sqrt{2} G_F N_e E$。`
+  },
+  {
+    id: 4,
+    title: "CJPL 1-ton 原型探测器 Muon 本底研究",
+    date: "2025-03-05",
+    tags: ["探测器", "数据分析", "Muon"],
+    preview: "分析 CJPL 1-ton 原型探测器中宇宙线 muon 引起的本底事例率和特征。",
+    content: `## CJPL 1-ton 原型探测器 Muon 本底研究
+
+### 实验设置
+- 地点：中国锦屏地下实验室 (CJPL)
+- 岩石覆盖：约 2400 m
+- 探测器：1 吨液体闪烁体原型
+
+### Muon 通量
+在 CJPL 深度，muon 通量约为：
+$$\\Phi_\\mu \\approx 2 \\times 10^{-10} \\text{ cm}^{-2}\\text{s}^{-1}$$
+
+这比地表低了约 6 个数量级。
+
+### 分析方法
+1. 利用外置 muon 反符合探测器标记 muon 事例
+2. 分析 muon 引起的快中子本底
+3. 研究 muon 产生的 ^9Li/^8He 同位素本底
+
+### 初步结果
+- Muon 标记效率 > 99%
+- 残余 muon 引起的本底率 < 0.1 events/day/ton`
+  },
+  {
+    id: 5,
+    title: "Geant4 模拟液体闪烁体探测器",
+    date: "2025-02-18",
+    tags: ["探测器", "模拟", "Geant4"],
+    preview: "使用 Geant4 构建液体闪烁体探测器模型，模拟光产额和能量响应。",
+    content: `## Geant4 模拟液体闪烁体探测器
+
+### 探测器几何
+\`\`\`cpp
+G4double radius = 1.0 * m;
+G4double height = 2.0 * m;
+G4Tubs* solidDet = new G4Tubs("Detector", 0, radius, height/2, 0, 2*CLHEP::pi);
+G4LogicalVolume* logicDet = new G4LogicalVolume(solidDet, LS, "Detector");
+\`\`\`
+
+### 光学过程
+必须包含的关键物理过程：
+- G4Scintillation (闪烁光)
+- G4OpAbsorption (光吸收)
+- G4OpRayleigh (瑞利散射)
+- G4OpBoundaryProcess (边界反射/折射)
+
+### 光产额设置
+\`\`\`cpp
+G4MaterialPropertiesTable* mpt = new G4MaterialPropertiesTable();
+mpt->AddConstProperty("SCINTILLATIONYIELD", 10000./MeV);
+mpt->AddConstProperty("RESOLUTIONSCALE", 1.0);
+LS->SetMaterialPropertiesTable(mpt);
+\`\`\``
+  },
+  {
+    id: 6,
+    title: "PMT 增益刻度与单光电子谱",
+    date: "2025-01-22",
+    tags: ["探测器", "PMT"],
+    preview: "通过单光电子谱拟合确定 PMT 增益，讨论不同拟合方法的优劣。",
+    content: `## PMT 增益刻度
+
+### 单光电子谱 (SPE)
+低光强下的 PMT 电荷谱由多个高斯峰组成：
+$$f(x) = \\sum_{n=0}^{\\infty} \\frac{\\mu^n e^{-\\mu}}{n!} \\cdot \\frac{1}{\\sqrt{2\\pi n}\\sigma_1} \\exp\\left(-\\frac{(x - n Q_1)^2}{2n\\sigma_1^2}\\right)$$
+
+### 拟合方法
+1. **多高斯拟合**：直接拟合前 3-4 个峰
+2. **极大似然法**：考虑完整的光电子统计
+3. **简化方法**：低光强下用指数+高斯拟合 pedestal 和单光电子峰
+
+### ROOT 实现
+\`\`\`cpp
+TF1* speFit = new TF1("spe", speFunction, -50, 500, 4);
+speFit->SetParameters(pedMean, pedSigma, gain, gainSigma);
+hist->Fit(speFit, "LR");
+double gain = speFit->GetParameter(2);
+\`\`\``
+  }
+];
+
+// ═══════════ 渲染笔记列表 ═══════════
+let activeTag = null;
+
+function getAllTags() {
+  const tagSet = new Set();
+  notes.forEach(n => n.tags.forEach(t => tagSet.add(t)));
+  return [...tagSet].sort();
+}
+
+function renderTagFilter() {
+  const container = document.getElementById('tagFilter');
+  const tags = getAllTags();
+  container.innerHTML = tags.map(t =>
+    `<span class="tag-chip${t === activeTag ? ' active' : ''}" onclick="toggleTag('${t}')">${t}</span>`
+  ).join('');
+}
+
+function toggleTag(tag) {
+  activeTag = (activeTag === tag) ? null : tag;
+  renderTagFilter();
+  renderNotes();
+}
+
+function renderNotes() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const list = document.getElementById('noteList');
+
+  const filtered = notes.filter(n => {
+    const matchSearch = !search || n.title.toLowerCase().includes(search) || n.preview.toLowerCase().includes(search) || n.tags.some(t => t.toLowerCase().includes(search));
+    const matchTag = !activeTag || n.tags.includes(activeTag);
+    return matchSearch && matchTag;
+  });
+
+  list.innerHTML = filtered.map(n => `
+    <li class="note-item">
+      <div class="note-title" onclick="openNote(${n.id})">${n.title}</div>
+      <div class="note-meta">${n.date} · ${n.tags.map(t => `<span class="note-tag">${t}</span>`).join(' ')}</div>
+      <div class="note-preview">${n.preview}</div>
+    </li>
+  `).join('') || '<li style="color:var(--muted);text-align:center;padding:2rem;">没有找到匹配的笔记 📭</li>';
+}
+
+function openNote(id) {
+  const n = notes.find(x => x.id === id);
+  if (!n) return;
+  document.getElementById('modalTitle').textContent = n.title;
+  document.getElementById('modalDate').textContent = n.date + ' · ' + n.tags.join(', ');
+  // 简单 Markdown → HTML
+  let html = n.content
+    .replace(/### (.+)/g, '<h4>$1</h4>')
+    .replace(/## (.+)/g, '<h3>$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`{3}(\w*)\n([\s\S]*?)`{3}/g, '<pre><code>$2</code></pre>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/^- (.+)/gm, '<li>$1</li>')
+    .replace(/(<li>[\s\S]*?<\/li>)/g, '<ul>$1</ul>')
+    .replace(/\n/g, '<br>');
+  // 渲染 KaTeX 公式
+  html = html.replace(/\$\$([\s\S]*?)\$\$/g, (_, tex) => {
+    try { return katex.renderToString(tex, { throwOnError: false, displayMode: true }); } catch(e) { return `<em>${tex}</em>`; }
+  });
+  html = html.replace(/\$([^$]+)\$/g, (_, tex) => {
+    try { return katex.renderToString(tex, { throwOnError: false, displayMode: false }); } catch(e) { return `<em>${tex}</em>`; }
+  });
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+// 键盘关闭弹窗
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// 初始化
+renderTagFilter();
+renderNotes();
+</script>
+
+<!-- KaTeX for math rendering -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+</body>
+</html>

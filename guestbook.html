@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>留言板 · Yapeng</title>
+  <style>
+    :root {
+      --bg: #f8f9fa; --card-bg: #ffffff; --text: #212529; --muted: #6c757d;
+      --accent: #0d6efd; --border: #dee2e6; --radius: 12px; --shadow: 0 1px 3px rgba(0,0,0,.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Noto Sans SC", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.7;
+      min-height: 100vh; display: flex; flex-direction: column;
+    }
+    .navbar {
+      background: var(--card-bg); border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100;
+    }
+    .navbar-inner {
+      max-width: 960px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between; padding: .75rem 1.5rem;
+    }
+    .navbar .brand { font-size: 1.25rem; font-weight: 700; color: var(--text); text-decoration: none; }
+    .navbar .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+    .navbar .nav-links a { text-decoration: none; color: var(--muted); font-weight: 500; transition: color .15s; }
+    .navbar .nav-links a:hover, .navbar .nav-links a.active { color: var(--accent); }
+
+    .main { max-width: 960px; margin: 2rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
+    .card {
+      background: var(--card-bg); border-radius: var(--radius);
+      box-shadow: var(--shadow); border: 1px solid var(--border); padding: 2rem; margin-bottom: 1.5rem;
+    }
+    .card h2 { font-size: 1.35rem; margin-bottom: 1rem; padding-bottom: .5rem; border-bottom: 2px solid var(--accent); }
+
+    /* ── 留言表单 ── */
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-weight: 500; margin-bottom: .3rem; font-size: .9rem; }
+    .form-group input, .form-group textarea {
+      width: 100%; padding: .7rem; border: 1px solid var(--border); border-radius: 8px;
+      font-size: .95rem; font-family: inherit; transition: border-color .15s;
+    }
+    .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(13,110,253,.15); }
+    .form-group textarea { min-height: 120px; resize: vertical; }
+    .form-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .form-row .form-group { flex: 1; min-width: 150px; }
+    .btn {
+      background: var(--accent); color: #fff; border: none;
+      padding: .65rem 1.8rem; border-radius: 8px; font-size: .95rem;
+      cursor: pointer; font-weight: 500; transition: opacity .15s;
+    }
+    .btn:hover { opacity: .85; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .char-count { text-align: right; font-size: .8rem; color: var(--muted); margin-top: .2rem; }
+
+    /* ── 留言列表 ── */
+    .msg-count { color: var(--muted); font-size: .9rem; margin-bottom: 1rem; }
+    .msg-card {
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1.25rem; margin-bottom: .75rem;
+      transition: box-shadow .15s;
+    }
+    .msg-card:hover { box-shadow: var(--shadow); }
+    .msg-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; flex-wrap: wrap; gap: .5rem; }
+    .msg-author { font-weight: 600; display: flex; align-items: center; gap: .5rem; }
+    .msg-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: .85rem; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .msg-time { color: var(--muted); font-size: .8rem; }
+    .msg-body { color: var(--text); white-space: pre-wrap; word-break: break-word; }
+    .msg-actions { display: flex; gap: .5rem; margin-top: .5rem; }
+    .btn-sm {
+      padding: .25rem .7rem; font-size: .78rem; border-radius: 6px;
+      border: 1px solid var(--border); background: #fff; color: var(--muted); cursor: pointer;
+      transition: all .15s;
+    }
+    .btn-sm:hover { background: #f0f0f0; }
+    .btn-sm.danger { color: #dc3545; border-color: #dc3545; }
+    .btn-sm.danger:hover { background: #dc3545; color: #fff; }
+    .reply-badge {
+      font-size: .75rem; background: #e7f1ff; color: var(--accent);
+      padding: .1rem .5rem; border-radius: 10px; cursor: pointer;
+    }
+
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+    .empty-state .icon { font-size: 3rem; margin-bottom: .5rem; }
+    .pagination { display: flex; justify-content: center; gap: .5rem; margin-top: 1.5rem; }
+    .pagination button {
+      padding: .4rem .9rem; border: 1px solid var(--border); border-radius: 6px;
+      background: #fff; cursor: pointer; font-size: .85rem;
+    }
+    .pagination button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .pagination button:disabled { opacity: .4; cursor: not-allowed; }
+
+    footer {
+      text-align: center; padding: 1.5rem; color: var(--muted);
+      font-size: .85rem; border-top: 1px solid var(--border); margin-top: 2rem;
+    }
+    @media (max-width: 600px) {
+      .navbar-inner { flex-direction: column; gap: .5rem; }
+      .form-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a class="brand" href="index.html">🏠 Yapeng</a>
+    <ul class="nav-links">
+      <li><a href="index.html">简历</a></li>
+      <li><a href="notes.html">笔记</a></li>
+      <li><a href="guestbook.html" class="active">留言板</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="main">
+
+  <!-- 留言表单 -->
+  <div class="card">
+    <h2>💬 留言板</h2>
+    <p style="color:var(--muted);font-size:.9rem;margin-bottom:1rem;">欢迎留下你的足迹！所有留言会保存在浏览器本地存储中。</p>
+    <form id="msgForm" onsubmit="submitMessage(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="msgName">昵称 *</label>
+          <input type="text" id="msgName" placeholder="你的昵称" required maxlength="30" />
+        </div>
+        <div class="form-group">
+          <label for="msgEmail">邮箱（选填，不会公开）</label>
+          <input type="email" id="msgEmail" placeholder="your@email.com" maxlength="100" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="msgContent">留言内容 *</label>
+        <textarea id="msgContent" placeholder="写下你想说的话..." required maxlength="1000" oninput="updateCharCount()"></textarea>
+        <div class="char-count"><span id="charCount">0</span> / 1000</div>
+      </div>
+      <button type="submit" class="btn">✉️ 发布留言</button>
+    </form>
+  </div>
+
+  <!-- 留言列表 -->
+  <div class="card">
+    <h2>全部留言 <span class="msg-count" id="msgCount"></span></h2>
+    <div id="msgList"></div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+
+</div>
+
+<footer>© 2026 Yapeng Wang · Hosted on GitHub Pages</footer>
+
+<script>
+// ═══════════ 留言数据管理 ═══════════
+const STORAGE_KEY = 'yapeng_guestbook_messages';
+const MSGS_PER_PAGE = 5;
+let currentPage = 1;
+
+function loadMessages() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  } catch(e) {
+    return [];
+  }
+}
+
+function saveMessages(msgs) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs));
+}
+
+// ═══════════ 头像颜色 ═══════════
+function avatarColor(name) {
+  const colors = ['#0d6efd','#198754','#dc3545','#fd7e14','#6f42c1','#d63384','#0dcaf0','#20c997'];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
+}
+
+// ═══════════ 提交留言 ═══════════
+function submitMessage(e) {
+  e.preventDefault();
+  const name = document.getElementById('msgName').value.trim();
+  const email = document.getElementById('msgEmail').value.trim();
+  const content = document.getElementById('msgContent').value.trim();
+
+  if (!name || !content) return;
+
+  const msg = {
+    id: Date.now(),
+    name,
+    email,
+    content,
+    time: new Date().toISOString(),
+    replyTo: null
+  };
+
+  const msgs = loadMessages();
+  msgs.unshift(msg);
+  saveMessages(msgs);
+
+  // 清空表单
+  document.getElementById('msgName').value = '';
+  document.getElementById('msgEmail').value = '';
+  document.getElementById('msgContent').value = '';
+  updateCharCount();
+
+  currentPage = 1;
+  renderMessages();
+}
+
+// ═══════════ 删除留言 ═══════════
+function deleteMessage(id) {
+  if (!confirm('确定要删除这条留言吗？')) return;
+  let msgs = loadMessages();
+  msgs = msgs.filter(m => m.id !== id);
+  saveMessages(msgs);
+  renderMessages();
+}
+
+// ═══════════ 渲染留言 ═══════════
+function renderMessages() {
+  const msgs = loadMessages();
+  const totalPages = Math.ceil(msgs.length / MSGS_PER_PAGE) || 1;
+
+  // 确保当前页有效
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+
+  const start = (currentPage - 1) * MSGS_PER_PAGE;
+  const pageMsgs = msgs.slice(start, start + MSGS_PER_PAGE);
+
+  // 计数
+  document.getElementById('msgCount').textContent = `(${msgs.length} 条留言)`;
+
+  // 列表
+  const list = document.getElementById('msgList');
+  if (pageMsgs.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>还没有留言，来做第一个留言的人吧！</p></div>`;
+  } else {
+    list.innerHTML = pageMsgs.map(m => {
+      const timeStr = new Date(m.time).toLocaleString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+      const initial = m.name.charAt(0).toUpperCase();
+      const color = avatarColor(m.name);
+      return `
+        <div class="msg-card">
+          <div class="msg-header">
+            <span class="msg-author">
+              <span class="msg-avatar" style="background:${color}">${initial}</span>
+              ${escapeHtml(m.name)}
+            </span>
+            <span class="msg-time">${timeStr}</span>
+          </div>
+          <div class="msg-body">${escapeHtml(m.content)}</div>
+          <div class="msg-actions">
+            <button class="btn-sm danger" onclick="deleteMessage(${m.id})">🗑 删除</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // 分页
+  const pag = document.getElementById('pagination');
+  if (totalPages <= 1) {
+    pag.innerHTML = '';
+  } else {
+    let html = `<button ${currentPage === 1 ? 'disabled' : ''} onclick="goPage(${currentPage - 1})">← 上一页</button>`;
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<button class="${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
+    }
+    html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="goPage(${currentPage + 1})">下一页 →</button>`;
+    pag.innerHTML = html;
+  }
+}
+
+function goPage(p) {
+  currentPage = p;
+  renderMessages();
+  document.getElementById('msgList').scrollIntoView({ behavior: 'smooth' });
+}
+
+function updateCharCount() {
+  const len = document.getElementById('msgContent').value.length;
+  document.getElementById('charCount').textContent = len;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// 初始化
+renderMessages();
+updateCharCount();
+</script>
+
+</body>
+</html>
